@@ -1,0 +1,89 @@
+.hangman-container {
+  position: relative;
+  height: 300px;
+  width: 200px;
+  margin: 0 auto;
+}
+
+.gallows {
+  height: 100%;
+  width: 10px;
+  background-color: white;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.bone {
+  background-color: #fff;
+  position: absolute;
+}
+
+.head {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 3px solid white;
+  background-color: black;
+}
+
+.body {
+  width: 8px;
+  height: 60px;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+}
+
+.arm.left {
+  width: 40px;
+  height: 6px;
+  top: 90px;
+  left: 10px;
+  transform: rotate(30deg);
+}
+
+.arm.right {
+  width: 40px;
+  height: 6px;
+  top: 90px;
+  right: 10px;
+  transform: rotate(-30deg);
+}
+
+.leg.left {
+  width: 40px;
+  height: 6px;
+  top: 130px;
+  left: 10px;
+  transform: rotate(45deg);
+}
+
+.leg.right {
+  width: 40px;
+  height: 6px;
+  top: 130px;
+  right: 10px;
+  transform: rotate(-45deg);
+}
+
+.fire {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  color: red;
+  animation: flicker 1s infinite;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.2; transform: scale(1); }
+}
