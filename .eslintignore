@@ -1,0 +1,9 @@
+# ESLint ignore patterns
+# Ignorar archivos que ya no existen pero pueden estar en cache
+
+# Ignorar cualquier archivo de MusicControls que pueda existir
+**/MusicControlsMenu*
+
+# Cache files
+node_modules/.cache/
+.eslintcache

@@ -1,56 +1,105 @@
-// src/components/MusicPlayer.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef, forwardRef, useImperativeHandle } from "react";
+import { musicTracks } from "./musicTracks";
 
-const musicTracks = [
-  "/media/me1Gallowmere Land - SorcererZarok.mp3",
-  "/media/me2Main Menu - SorcererZarok.mp3",
-  "/media/me3Crypt & Graveyard - SorcererZarok.mp3",
-  "/media/me4Cemetery Hill - SorcererZarok.mp3",
-  "/media/me5The Hilltop Mausoleum - SorcererZarok.mp3",
-  "/media/me6Return to the Graveyard.mp3",
-  "/media/me7Scarecrow Fields - SorcererZarok.mp3",
-];
+export interface MusicPlayerRef {
+  play: () => void;
+  pause: () => void;
+  next: () => void;
+  prev: () => void;
+  random: () => void;
+  volumeUp: () => void;
+  volumeDown: () => void;
+  getCurrentSong: () => string;
+  isPlaying: () => boolean;
+}
 
-export default function MusicPlayer() {
-  const [started, setStarted] = useState(false);
+interface MusicPlayerProps {
+  started: boolean;
+  autoPlay?: boolean;
+}
+
+const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>((props, ref) => {
+  const { started, autoPlay = false } = props;
   const [currentTrack, setCurrentTrack] = useState(0);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlayingState, setIsPlayingState] = useState(false);
+  const [volume, setVolume] = useState(50);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleUserStart = () => {
-    setStarted(true);
-  };
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      if (audioRef.current) {
+        audioRef.current.play();
+        setIsPlayingState(true);
+      }
+    },
+    pause: () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlayingState(false);
+      }
+    },
+    next: () => {
+      setCurrentTrack((prev) => (prev + 1) % musicTracks.length);
+    },
+    prev: () => {
+      setCurrentTrack((prev) => (prev - 1 + musicTracks.length) % musicTracks.length);
+    },
+    random: () => {
+      const randomIndex = Math.floor(Math.random() * musicTracks.length);
+      setCurrentTrack(randomIndex);
+    },
+    volumeUp: () => {
+      const newVolume = Math.min(volume + 10, 100);
+      setVolume(newVolume);
+      if (audioRef.current) {
+        audioRef.current.volume = newVolume / 100;
+      }
+    },
+    volumeDown: () => {
+      const newVolume = Math.max(volume - 10, 0);
+      setVolume(newVolume);
+      if (audioRef.current) {
+        audioRef.current.volume = newVolume / 100;
+      }
+    },
+    getCurrentSong: () => musicTracks[currentTrack].name,
+    isPlaying: () => isPlayingState,
+  }));
 
-  // Reproduce la canción cuando se cambia la pista
   useEffect(() => {
     if (started && audioRef.current) {
-      audioRef.current.src = musicTracks[currentTrack];
-      audioRef.current
-        .play()
-        .catch((err) => console.error("Error al reproducir:", err));
+      audioRef.current.src = musicTracks[currentTrack].src;
+      audioRef.current.volume = volume / 100;
+      
+      if (autoPlay || isPlayingState) {
+        audioRef.current
+          .play()
+          .then(() => {
+            setIsPlayingState(true);
+          })
+          .catch(() => {});
+      }
     }
-  }, [currentTrack, started]);
+  }, [currentTrack, started, autoPlay]);
 
-  // Avanza a la siguiente pista cuando termina la actual
   const handleEnded = () => {
     setCurrentTrack((prevIndex) => (prevIndex + 1) % musicTracks.length);
   };
 
+  // Si no ha started, no renderizamos nada visible
+  if (!started) {
+    return null;
+  }
+
   return (
-    <div style={{ textAlign: "center", marginTop: "20px" }}>
-      {!started ? (
-        <button
-          onClick={handleUserStart}
-          style={{ padding: "10px 20px", fontSize: "16px" }}
-        >
-          🎵 Iniciar Música
-        </button>
-      ) : (
-        <audio
-          ref={audioRef}
-          onEnded={handleEnded}
-          autoPlay
-        />
-      )}
-    </div>
+    <audio
+      ref={audioRef}
+      onEnded={handleEnded}
+    />
   );
-}
+});
+
+MusicPlayer.displayName = "MusicPlayer";
+
+export default MusicPlayer;
+
